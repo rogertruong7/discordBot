@@ -2,10 +2,11 @@
   "name": "discordbot",
   "version": "1.0.0",
   "description": "yo",
-  "main": "index.js",
-  "type": "module",
+  "main": "./src/index.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "n": "nodemon ./src/index.js ./database/db.js"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +14,7 @@
   "dependencies": {
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.1",
+    "mysql2": "^3.9.0",
     "node.js": "^0.0.1-security"
   }
 }
