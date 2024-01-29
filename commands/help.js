@@ -40,7 +40,7 @@ const helpEmbed = new EmbedBuilder()
     }
   );
 function help(message) {
-    message.channel.send({ embeds: [helpEmbed] });
+    message.reply({ embeds: [helpEmbed] });
     return;
 }
 
