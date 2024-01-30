@@ -37,8 +37,8 @@ client.login(process.env.DISCORD_TOKEN);
 client.on("ready", () => {
   console.log(`I'm online!`);
   client.user.setActivity({
-    name: "PREFIX IS !",
-    type: ActivityType.Custom,
+    name: "!help",
+    type: ActivityType.Listening,
   });
 });
 
@@ -53,8 +53,6 @@ let player1 = 0;
 let player2 = 0;
 
 client.on("messageCreate", async (message) => {
-
-  
   const messageReceived = message.content.toLowerCase();
   if (!message?.author.bot && messageReceived.includes("oh no")) {
     message.channel.send({
@@ -72,9 +70,8 @@ client.on("messageCreate", async (message) => {
     let words = message.content.split(" ");
     console.log(words);
     const command1 = words[0];
-    console.log(command1);
     const command = command1.slice(length);
-    if (command !== "blackjack" && command !== "help" && command !== "gunfight")
+    if (command !== "blackjack" && command !== "help" && command !== "gunfight" && command !== 'exit')
       return;
 
     //maybe when i hv database do in_game_flag
@@ -82,6 +79,14 @@ client.on("messageCreate", async (message) => {
     if (command === "help") {
       help(message);
     } 
+    else if (command === "exit") {
+      flag = 1;
+      chosenCards = [];
+      namedCards = [];
+      dealerPoints = 0;
+      playerPoints = 0;
+      message.channel.send("You have exited the game and surrendered your money.")
+    }
     else if (command === "blackjack" && flag === 1) {
       flag = 0;
       const result = blackjack(message, chosenCards, namedCards);
@@ -100,7 +105,7 @@ client.on("messageCreate", async (message) => {
       player1 = message.author;
       console.log(player2);
 
-      playerWord = generate({ minLength: 6 });
+      playerWord = generate({ minLength: 3 });
       console.log(playerWord);
       message.channel.send(
         "Type the following word as quickly as possible. It will appear in 3 seconds."
@@ -115,7 +120,7 @@ client.on("messageCreate", async (message) => {
         message.channel.send("1");
       }, 2500);
       setTimeout(() => {
-        message.channel.send(playerWord);
+        message.channel.send(`Your gunfight word is **${playerWord}**`);
       }, 3500);
     } 
     else if (flag === 0) {

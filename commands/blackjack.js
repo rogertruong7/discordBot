@@ -17,7 +17,7 @@ const loseString = "**You lose! DEALER WINS!**";
 const winString = "**PLAYER WINS!**";
 
 let blackjackEmbed = {
-  color: 0x0099ff,
+  color: 0xff0000,
   title: "Blackjack",
   thumbnail: {
     url: "https://static.wikia.nocookie.net/nicos-nextbots-fanmade/images/b/bd/Bigbird.png/revision/latest?cb=20230225202734",
@@ -130,11 +130,11 @@ export function blackjack(message, chosenCards, namedCards) {
   }
 
   // Creating strings to be entered into the embed
-  let dealerString = `Dealer cards:\n• ${namedCards[1]}\n• **UNKNOWN**`;
+  let dealerString = `DEALER CARDS:\n• ${namedCards[1]}\n• **UNKNOWN**`;
   let bottomText = "Choose to either **HIT** or **STAND**";
   if (playerPoints === 21) {
     bottomText = "**Blackjack!** " + winString;
-    dealerString = `Dealer cards: \n• ${namedCards[1]} \n• ${namedCards[3]}`;
+    dealerString = `DEALER CARDS: \n• ${namedCards[1]} \n• ${namedCards[3]}`;
   }
 
   // Changing Embed Fields
@@ -143,7 +143,7 @@ export function blackjack(message, chosenCards, namedCards) {
     value: `Score: **${dealerPoints}**`,
   };
   blackjackEmbed.fields[1] = {
-    name: `Your cards:\n• ${namedCards[0]}\n• ${namedCards[2]}`,
+    name: `YOUR CARDS:\n• ${namedCards[0]}\n• ${namedCards[2]}`,
     value: `Score: **${playerPoints}**`,
   };
   blackjackEmbed.fields[2].value = bottomText;
@@ -153,12 +153,12 @@ export function blackjack(message, chosenCards, namedCards) {
   const hitButton = new ButtonBuilder()
     .setCustomId(`hit` + message.author.id)
     .setLabel("HIT")
-    .setStyle(ButtonStyle.Primary);
+    .setStyle(ButtonStyle.Danger);
 
   const standButton = new ButtonBuilder()
     .setCustomId(`stand` + message.author.id)
     .setLabel("STAND")
-    .setStyle(ButtonStyle.Primary);
+    .setStyle(ButtonStyle.Danger);
 
   const row = new ActionRowBuilder().addComponents(hitButton, standButton);
   const messageObject = {
@@ -199,6 +199,13 @@ export function blackjackCont(
   dealerPoints,
   playerPoints
 ) {
+  try {
+    if (namedCards[1].includes("Ace")) {
+      console.log("Error caught")
+    }
+  } catch (error) {
+    console.error("Button was before server restarted", error);
+  }
   // Drawing a card
   const result = getRandomNumber(chosenCards);
   const card = result.value;
@@ -213,9 +220,9 @@ export function blackjackCont(
     const cardAmount = namedCards.length;
 
     // Creating the strings for the embed
-    let yourString = `Your cards: \n• ${namedCards[0]}\n• ${namedCards[2]}`;
+    let yourString = `YOUR CARDS: \n• ${namedCards[0]}\n• ${namedCards[2]}`;
     let hiddenDealerPoints = dealerPoints - cardPoints[chosenCards[3]];
-    let dealerString = `Dealer cards: \n• ${namedCards[1]} \n• **UNKNOWN**`;
+    let dealerString = `DEALER CARDS: \n• ${namedCards[1]} \n• **UNKNOWN**`;
 
     // If an amount is added to a hand with an Ace in it
     // and the amount is more than 21, it will make the Ace go from
@@ -254,11 +261,11 @@ export function blackjackCont(
     let bottomText = "Choose to either **HIT** or **STAND**";
     if (playerPoints === 21) {
       bottomText = "**Blackjack!** " + winString;
-      dealerString = `Dealer cards: \n• ${namedCards[1]} \n• ${namedCards[3]}`;
+      dealerString = `DEALER CARDS: \n• ${namedCards[1]} \n• ${namedCards[3]}`;
       hiddenDealerPoints = dealerPoints;
     } else if (playerPoints > 21) {
       bottomText = loseString;
-      dealerString = `Dealer cards: \n• ${namedCards[1]} \n• ${namedCards[3]}`;
+      dealerString = `DEALER CARDS: \n• ${namedCards[1]} \n• ${namedCards[3]}`;
       hiddenDealerPoints = dealerPoints;
     }
 
@@ -281,12 +288,12 @@ export function blackjackCont(
     const hitButton = new ButtonBuilder()
       .setCustomId(`hit` + interaction.user.id)
       .setLabel("HIT")
-      .setStyle(ButtonStyle.Primary);
+      .setStyle(ButtonStyle.Danger);
 
     const standButton = new ButtonBuilder()
       .setCustomId(`stand` + interaction.user.id)
       .setLabel("STAND")
-      .setStyle(ButtonStyle.Primary);
+      .setStyle(ButtonStyle.Danger);
 
     const row = new ActionRowBuilder().addComponents(hitButton, standButton);
     const messageObject = {
@@ -298,7 +305,7 @@ export function blackjackCont(
       // Set timeout ensures it sends after the embed
       setTimeout(() => {
         interaction.channel.send(messageObject);
-      }, 500);
+      }, 1000);
       // Return with new values and flag = 0
       return {
         flag: 0,
@@ -319,8 +326,8 @@ export function blackjackCont(
   } else if (interaction.customId === "stand" + interaction.user.id) {
     // Else if statement for Stand choice
     // Strings for embed
-    let dealerString = `Dealer cards: \n• ${namedCards[1]} \n• ${namedCards[3]}`;
-    let yourString = `Your cards: \n• ${namedCards[0]}\n• ${namedCards[2]}`;
+    let dealerString = `DEALER CARDS: \n• ${namedCards[1]} \n• ${namedCards[3]}`;
+    let yourString = `YOUR CARDS: \n• ${namedCards[0]}\n• ${namedCards[2]}`;
 
     // We drew one card at the beginning which is if the card is needed
     // Thus to create the new your string
@@ -354,6 +361,9 @@ export function blackjackCont(
     else if (dealerPoints >= 17) {
       if (dealerPoints > playerPoints) {
         blackjackEmbed.fields[2].value = loseString;
+        interaction.reply({ embeds: [blackjackEmbed] });
+      } else if (dealerPoints === playerPoints) {
+        blackjackEmbed.fields[2].value = "**It's a tie!**";
         interaction.reply({ embeds: [blackjackEmbed] });
       } else {
         blackjackEmbed.fields[2].value = winString;
@@ -437,11 +447,20 @@ export function blackjackCont(
       if (dealerPoints === 21) {
         blackjackEmbed.fields[2].value = "**Blackjack!** " + loseString;
         interaction.reply({ embeds: [blackjackEmbed] });
+      } else if (dealerPoints > 21) {
+        // Dealer Loses
+        blackjackEmbed.fields[2].value = winString;
+        interaction.reply({ embeds: [blackjackEmbed] });
+      } else if (dealerPoints > playerPoints) {
+        // Dealer is not over 21 but more than player
+        blackjackEmbed.fields[2].value = loseString;
+        interaction.reply({ embeds: [blackjackEmbed] });
       } else if (dealerPoints < playerPoints) {
         blackjackEmbed.fields[2].value = winString;
         interaction.reply({ embeds: [blackjackEmbed] });
-      } else {
-        blackjackEmbed.fields[2].value = loseString;
+      } else if (dealerPoints === playerPoints) {
+        // Same points
+        blackjackEmbed.fields[2].value = "**It's a tie!**";
         interaction.reply({ embeds: [blackjackEmbed] });
       }
     } // if after third card it is not 21 but more than 17
@@ -453,6 +472,9 @@ export function blackjackCont(
       } else if (dealerPoints > playerPoints) {
         // Dealer is not over 21 but more than player
         blackjackEmbed.fields[2].value = loseString;
+        interaction.reply({ embeds: [blackjackEmbed] });
+      } else if (dealerPoints < playerPoints) {
+        blackjackEmbed.fields[2].value = winString;
         interaction.reply({ embeds: [blackjackEmbed] });
       } else if (dealerPoints === playerPoints) {
         // Same points
