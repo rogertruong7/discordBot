@@ -1,6 +1,8 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-const {
+import { generate, count } from "random-words";
+import {
   Client,
   GatewayIntentBits,
   IntentsBitField,
@@ -11,10 +13,12 @@ const {
   TextInputStyle,
   ActivityType,
   EmbedBuilder,
-} = require("discord.js");
+  Events,
+  ActionRowBuilder,
+} from "discord.js";
 
-const help = require("../commands/help.js");
-const { blackjack, blackjackCont } = require("../commands/blackjack.js");
+import help from "../commands/help.js";
+import { blackjack, blackjackCont } from "../commands/blackjack.js";
 
 const client = new Client({
   intents: [
@@ -44,38 +48,77 @@ let chosenCards = [];
 let namedCards = [];
 let dealerPoints = 0;
 let playerPoints = 0;
+let playerWord = "dw1ioe1qwa213djawjqewq1daw";
+let player1 = 0;
+let player2 = 0;
 
 client.on("messageCreate", async (message) => {
+
+  
   const messageReceived = message.content.toLowerCase();
   if (!message?.author.bot && messageReceived.includes("oh no")) {
     message.channel.send({
-      content: `Oh no! Oh no! I'm the Biggest Bird :musical_note: I'm the Biggest Bird :musical_note:`
-    }
-    );
+      content: `Oh no! Oh no! I'm the Biggest Bird :musical_note: I'm the Biggest Bird :musical_note:`,
+    });
+  }
+  if (!message?.author.bot && (message.author === player1 || message.author === player2) && messageReceived.includes(playerWord)) {
+    message.channel.send(`${message.author} won!`);
+    playerWord = "dwioadjawjdaw";
   }
 
   // Commands
   if (!message?.author.bot && message.content.startsWith(prefix)) {
     const length = prefix.length;
-    const command = message.content.slice(length);
-    if (command !== "blackjack" && command !== "help") return;
+    let words = message.content.split(" ");
+    console.log(words);
+    const command1 = words[0];
+    console.log(command1);
+    const command = command1.slice(length);
+    if (command !== "blackjack" && command !== "help" && command !== "gunfight")
+      return;
 
     //maybe when i hv database do in_game_flag
 
     if (command === "help") {
       help(message);
-    } else if (command === "blackjack" && flag === 1) {
+    } 
+    else if (command === "blackjack" && flag === 1) {
       flag = 0;
-      const result = blackjack(message);
+      const result = blackjack(message, chosenCards, namedCards);
       setTimeout(() => {
         flag = 1;
-      }, 60000);
+      }, 30000);
       flag = result.flag;
       chosenCards = result.chosenCards;
       namedCards = result.namedCards;
       playerPoints = result.playerPoints;
       dealerPoints = result.dealerPoints;
-    } else if (flag === 0) {
+    } 
+    else if (command === "gunfight") {
+      console.log("Hello World");
+      player2 = message.mentions.users.first();
+      player1 = message.author;
+      console.log(player2);
+
+      playerWord = generate({ minLength: 6 });
+      console.log(playerWord);
+      message.channel.send(
+        "Type the following word as quickly as possible. It will appear in 3 seconds."
+      );
+      setTimeout(() => {
+        message.channel.send("3");
+      }, 500);
+      setTimeout(() => {
+        message.channel.send("2");
+      }, 1500);
+      setTimeout(() => {
+        message.channel.send("1");
+      }, 2500);
+      setTimeout(() => {
+        message.channel.send(playerWord);
+      }, 3500);
+    } 
+    else if (flag === 0) {
       message.channel.send(`You are already in a game.`);
       return;
     }
@@ -83,21 +126,28 @@ client.on("messageCreate", async (message) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  
   // Blackjack Buttons
   if (
     interaction.isButton() &&
     (interaction.customId === "hit" + interaction.user.id ||
       interaction.customId === "stand" + interaction.user.id)
   ) {
+
+    let lastMessages = await interaction.channel.messages.fetch({
+      limit: 10,
+    });
+    // If the component section of the message is > 0 i.e. a button
+    const button = lastMessages.find((item) => item.components.length !== 0);
+    // We delete said button
+    if (button) {
+      button.delete();
+    }
+    
     flag = 0;
-    console.log("interaction custom id = " + interaction.customId);
-    console.log(interaction);
-    console.log(
-      `This is the result\n chosen cards = ${chosenCards}, named cards = ${namedCards}`
-    );
-      
-    result = blackjackCont(
+    setTimeout(() => {
+      flag = 1;
+    }, 30000);
+    const result = blackjackCont(
       interaction,
       chosenCards,
       namedCards,

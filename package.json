@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "yo",
   "main": "./src/index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "n": "nodemon ./src/index.js ./database/db.js"
@@ -15,7 +15,8 @@
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.1",
     "mysql2": "^3.9.0",
-    "node.js": "^0.0.1-security"
+    "node.js": "^0.0.1-security",
+    "random-words": "^2.0.1"
   },
   "devDependencies": {
     "eslint": "^8.56.0"

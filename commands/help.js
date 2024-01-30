@@ -1,7 +1,7 @@
 
-const {
+import {
   EmbedBuilder,
-} = require("discord.js");
+} from "discord.js";
 
 let prefix = "!";
 
@@ -39,9 +39,8 @@ const helpEmbed = new EmbedBuilder()
       inline: false,
     }
   );
-function help(message) {
-    message.reply({ embeds: [helpEmbed] });
-    return;
+export default function help(message) {
+  message.reply({ embeds: [helpEmbed] });
+  return;
 }
 
-module.exports = help;
